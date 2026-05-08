@@ -760,7 +760,46 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
             "picture",
             "days_between_waterings",
             "health",
-            "next_watering"
+            "next_watering",
+            "moisture_problem",
+            "temperature_problem",
+            "illuminance_problem",
+            "conductivity_problem",
+            "battery_problem",
+            "moisture",
+            "temperature",
+            "illuminance",
+            "conductivity",
+            "battery"
+        ];
+    }
+    static{
+        this.metrics = [
+            {
+                key: "moisture",
+                problem_key: "moisture_problem",
+                icon: "mdi:water-percent"
+            },
+            {
+                key: "temperature",
+                problem_key: "temperature_problem",
+                icon: "mdi:thermometer"
+            },
+            {
+                key: "illuminance",
+                problem_key: "illuminance_problem",
+                icon: "mdi:weather-sunny"
+            },
+            {
+                key: "conductivity",
+                problem_key: "conductivity_problem",
+                icon: "mdi:sprout"
+            },
+            {
+                key: "battery",
+                problem_key: "battery_problem",
+                icon: "mdi:battery"
+            }
         ];
     }
     set hass(hass) {
@@ -845,6 +884,26 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const last_date = this._entity_states.get("last_watered").state;
         const last_watered = (0, $feccc7a5980a21d5$export$6270e84457db9b38)(last_date, local, today);
         const button_label = last_watered === today ? this._translations["cancel"] : this._translations["button"];
+        const metric_rows = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]).map(({ key: key, problem_key: problem_key, icon: icon })=>{
+            const entity = this._entity_states.get(key);
+            if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
+            const value = entity.state;
+            const unit = entity.attributes.unit_of_measurement ?? "";
+            const problem = this._entity_states.get(problem_key)?.state === "on";
+            return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                    <div class="row">
+                        <ha-icon
+                            .icon=${icon}
+                            ?data-color=${problem}
+                            style="${problem ? "--color: var(--error-color, Tomato);" : ""}"
+                            @click="${()=>this._moreInfo(key)}"
+                        ></ha-icon>
+                        <div class="content" @click="${()=>this._moreInfo(key)}">
+                            <p>${value} ${unit}</p>
+                        </div>
+                    </div>
+                `;
+        });
         // return card
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
             <ha-card>
@@ -890,6 +949,8 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                             </div>
                         </div>
 
+                        ${metric_rows}
+
                         <ha-button
                             @click="${()=>this._handleButton()}"
                         >${button_label}</ha-button>
@@ -927,8 +988,10 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         var trigger_update = false;
         if (!this._entity_ids || !this._hass) return;
         for (const [key, id] of Object.entries(this._entity_ids)){
-            if (!this._entity_states.has(key) || this._entity_states.get(key).state != this._hass.states[id].state) trigger_update = true;
-            this._entity_states.set(key, this._hass.states[id]);
+            const state = this._hass.states[id];
+            if (!state) continue;
+            if (!this._entity_states.has(key) || this._entity_states.get(key).state !== state.state) trigger_update = true;
+            this._entity_states.set(key, state);
         }
         if (trigger_update) this._states_updated = true;
     }
@@ -944,12 +1007,15 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const entities = Object.values(this._hass.entities);
         const device_entities = entities.filter((entity)=>entity.device_id == this._device_id);
         const entity_ids = device_entities.map(({ entity_id: entity_id })=>entity_id);
-        // parse entities
+        // Match longest key first so e.g. "moisture_problem" wins over "moisture"
+        const sortedKeys = [
+            ...$a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.keys
+        ].sort((a, b)=>b.length - a.length);
         entity_ids.forEach((id)=>{
-            $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.keys.forEach((key)=>{
-                if (id.includes(key)) // Associate the corresponding key with the matched string
+            for (const key of sortedKeys)if (id.includes(key)) {
                 this._entity_ids[key] = id;
-            });
+                break;
+            }
         });
     }
     async _loadTranslations() {
