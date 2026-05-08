@@ -1,4 +1,4 @@
-import { LovelaceCardConfig } from "custom-card-helpers";``
+import { LovelaceCardConfig } from "custom-card-helpers";
 import { html, LitElement } from 'lit';
 import { CARD_TYPE, INTEGRATION } from "./consts"
 import { styles } from "./styles";
@@ -151,7 +151,6 @@ export class SimplePlantCard extends LitElement {
                                 .icon=${"mdi:calendar-blank"
                             }></ha-icon>
                         </ha-icon-button>
-                    </div>
                     <div class="info">
                         <h1 @click="${() => this._navigateToDevice(this._device_id)}">
                             ${this._device_name}
@@ -179,7 +178,7 @@ export class SimplePlantCard extends LitElement {
                         </div>
 
                         <ha-button
-                            @click="${this._handleButton}"
+                            @click="${() => this._handleButton()}"
                         >${button_label}</ha-button>
                     </div>
                 </div>
@@ -270,10 +269,14 @@ export class SimplePlantCard extends LitElement {
         if (!this._entity_states.size || this._translations_loaded)
             return
         const translation_key = `component.${INTEGRATION}.entity.button.mark_watered.name`
-        this._translations["button"] = `${this._hass.localize(translation_key)} !`
-        this._translations["cancel"] = this._hass.localize("ui.dialogs.generic.cancel")
-        this._translations["today"] = this._hass.localize("ui.components.calendar.today")
-        this._translations["late"] = this._hass.localize(`component.${INTEGRATION}.entity.binary_sensor.problem.name`)
+        const button_name = this._hass.localize(translation_key)
+        if (button_name) this._translations["button"] = `${button_name} !`
+        const cancel = this._hass.localize("ui.dialogs.generic.cancel")
+        if (cancel) this._translations["cancel"] = cancel
+        const today = this._hass.localize("ui.components.calendar.today")
+        if (today) this._translations["today"] = today
+        const late = this._hass.localize(`component.${INTEGRATION}.entity.binary_sensor.problem.name`)
+        if (late) this._translations["late"] = late
         this._translations_loaded = true
     }
 }

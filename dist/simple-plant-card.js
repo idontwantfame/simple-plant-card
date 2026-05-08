@@ -864,7 +864,6 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                                 data-days="${days_between_value}"
                                 .icon=${"mdi:calendar-blank"}></ha-icon>
                         </ha-icon-button>
-                    </div>
                     <div class="info">
                         <h1 @click="${()=>this._navigateToDevice(this._device_id)}">
                             ${this._device_name}
@@ -892,7 +891,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                         </div>
 
                         <ha-button
-                            @click="${this._handleButton}"
+                            @click="${()=>this._handleButton()}"
                         >${button_label}</ha-button>
                     </div>
                 </div>
@@ -956,10 +955,14 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
     async _loadTranslations() {
         if (!this._entity_states.size || this._translations_loaded) return;
         const translation_key = `component.${(0, $3cb55e3e7ebd776a$export$a970e6ec17c9a61d)}.entity.button.mark_watered.name`;
-        this._translations["button"] = `${this._hass.localize(translation_key)} !`;
-        this._translations["cancel"] = this._hass.localize("ui.dialogs.generic.cancel");
-        this._translations["today"] = this._hass.localize("ui.components.calendar.today");
-        this._translations["late"] = this._hass.localize(`component.${(0, $3cb55e3e7ebd776a$export$a970e6ec17c9a61d)}.entity.binary_sensor.problem.name`);
+        const button_name = this._hass.localize(translation_key);
+        if (button_name) this._translations["button"] = `${button_name} !`;
+        const cancel = this._hass.localize("ui.dialogs.generic.cancel");
+        if (cancel) this._translations["cancel"] = cancel;
+        const today = this._hass.localize("ui.components.calendar.today");
+        if (today) this._translations["today"] = today;
+        const late = this._hass.localize(`component.${(0, $3cb55e3e7ebd776a$export$a970e6ec17c9a61d)}.entity.binary_sensor.problem.name`);
+        if (late) this._translations["late"] = late;
         this._translations_loaded = true;
     }
     constructor(...args){

@@ -1,4 +1,4 @@
-import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";``
+import { HomeAssistant, LovelaceCardConfig } from "custom-card-helpers";
 import { html, LitElement } from 'lit';
 
 import { INTEGRATION } from "./consts"
