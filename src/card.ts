@@ -8,6 +8,7 @@ import { HomeAssistant2, Dictionary, Entity, relativeDate } from "./helpers"
 
 export interface SimplePlantCardConfig extends LovelaceCardConfig {
   device: string;
+  sensor_layout?: "grid" | "list";
 }
 
 export class SimplePlantCard extends LitElement {
@@ -17,6 +18,7 @@ export class SimplePlantCard extends LitElement {
 
     // reactive
     private _device_id: string;
+    private _sensor_layout: string = "grid";
     private _translations_loaded: boolean = false;
     private _states_updated: boolean = true ;
 
@@ -45,6 +47,14 @@ export class SimplePlantCard extends LitElement {
         "illuminance_problem",
         "conductivity_problem",
         "battery_problem",
+        "moisture_min",
+        "moisture_max",
+        "temperature_min",
+        "temperature_max",
+        "illuminance_min",
+        "conductivity_min",
+        "conductivity_max",
+        "battery_min",
         "moisture",
         "temperature",
         "illuminance",
@@ -69,6 +79,7 @@ export class SimplePlantCard extends LitElement {
     // Reactive properties, a change on one of those triggers a re-render
     static properties = {
         _device_id: { type: String, state: true },
+        _sensor_layout: { type: String, state: true },
         _translations_loaded: { type: Boolean, state: true },
         _states_updated: {
             type: Boolean,
@@ -87,6 +98,7 @@ export class SimplePlantCard extends LitElement {
             throw new Error("You need to define a name");
         }
         this._device_id = config.device;
+        this._sensor_layout = config.sensor_layout ?? "grid";
         // while editing the entity in the card editor
         if (this._hass) {
             this.hass = this._hass
@@ -149,9 +161,10 @@ export class SimplePlantCard extends LitElement {
         const last_watered = relativeDate(last_date, local, today)
         const button_label = last_watered === today ? this._translations["cancel"] : this._translations["button"]
 
-        const metric_rows = SimplePlantCard.metrics
-            .filter(({key}) => this._entity_ids[key])
-            .map(({key, problem_key, icon}) => {
+        const configured_metrics = SimplePlantCard.metrics.filter(({key}) => this._entity_ids[key])
+        const metrics_section = configured_metrics.length === 0 ? html`` :
+            this._sensor_layout === "list"
+            ? html`${configured_metrics.map(({key, problem_key, icon}) => {
                 const entity = this._entity_states.get(key)
                 if (!entity) return html``
                 const value = entity.state
@@ -170,7 +183,28 @@ export class SimplePlantCard extends LitElement {
                         </div>
                     </div>
                 `
-            })
+            })}`
+            : html`
+                <div class="metrics-grid">
+                    ${configured_metrics.map(({key, problem_key, icon}) => {
+                        const entity = this._entity_states.get(key)
+                        if (!entity) return html``
+                        const value = entity.state
+                        const unit = entity.attributes.unit_of_measurement ?? ""
+                        const problem = this._entity_states.get(problem_key)?.state === "on"
+                        return html`
+                            <div class="metric-tile" @click="${() => this._moreInfo(key)}">
+                                <ha-icon
+                                    .icon=${icon}
+                                    ?data-color=${problem}
+                                    style="${problem ? "--color: var(--error-color, Tomato);" : ""}"
+                                ></ha-icon>
+                                <span>${value} ${unit}</span>
+                            </div>
+                        `
+                    })}
+                </div>
+            `
 
         // return card
         return html`
@@ -218,7 +252,7 @@ export class SimplePlantCard extends LitElement {
                             </div>
                         </div>
 
-                        ${metric_rows}
+                        ${metrics_section}
 
                         <ha-button
                             @click="${() => this._handleButton()}"

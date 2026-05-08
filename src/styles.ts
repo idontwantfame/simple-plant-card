@@ -92,6 +92,30 @@ export const styles = css`
         border-radius: 48px;
     }
 
+    .metrics-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .metric-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1 1 0;
+        min-width: 40px;
+        cursor: pointer;
+        gap: 2px;
+    }
+
+    .metric-tile span {
+        font-size: 11px;
+        color: var(--secondary-text-color);
+        text-align: center;
+        white-space: nowrap;
+    }
+
     ha-icon-button ha-icon::after {
         content: attr(data-days, "");
         position: absolute;

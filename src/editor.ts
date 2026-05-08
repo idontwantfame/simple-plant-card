@@ -10,6 +10,10 @@ export class SimplePlantCardEditor extends LitElement {
 
     static schema = [
         {name: "device", selector: { device: { integration: INTEGRATION} }},
+        {name: "sensor_layout", selector: { select: { mode: "list", options: [
+            {value: "grid", label: "Grid"},
+            {value: "list", label: "List"},
+        ]}}},
     ]
 
     static properties = {

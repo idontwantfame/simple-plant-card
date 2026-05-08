@@ -714,6 +714,30 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
         border-radius: 48px;
     }
 
+    .metrics-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .metric-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1 1 0;
+        min-width: 40px;
+        cursor: pointer;
+        gap: 2px;
+    }
+
+    .metric-tile span {
+        font-size: 11px;
+        color: var(--secondary-text-color);
+        text-align: center;
+        white-space: nowrap;
+    }
+
     ha-icon-button ha-icon::after {
         content: attr(data-days, "");
         position: absolute;
@@ -766,6 +790,14 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
             "illuminance_problem",
             "conductivity_problem",
             "battery_problem",
+            "moisture_min",
+            "moisture_max",
+            "temperature_min",
+            "temperature_max",
+            "illuminance_min",
+            "conductivity_min",
+            "conductivity_max",
+            "battery_min",
             "moisture",
             "temperature",
             "illuminance",
@@ -814,6 +846,10 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                 type: String,
                 state: true
             },
+            _sensor_layout: {
+                type: String,
+                state: true
+            },
             _translations_loaded: {
                 type: Boolean,
                 state: true
@@ -835,6 +871,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         // Triggers everytime the config of the card change
         if (!config.device) throw new Error("You need to define a name");
         this._device_id = config.device;
+        this._sensor_layout = config.sensor_layout ?? "grid";
         // while editing the entity in the card editor
         if (this._hass) this.hass = this._hass;
         this._config_updated = true;
@@ -884,7 +921,8 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const last_date = this._entity_states.get("last_watered").state;
         const last_watered = (0, $feccc7a5980a21d5$export$6270e84457db9b38)(last_date, local, today);
         const button_label = last_watered === today ? this._translations["cancel"] : this._translations["button"];
-        const metric_rows = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]).map(({ key: key, problem_key: problem_key, icon: icon })=>{
+        const configured_metrics = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]);
+        const metrics_section = configured_metrics.length === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`` : this._sensor_layout === "list" ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
             const value = entity.state;
@@ -903,7 +941,27 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                         </div>
                     </div>
                 `;
-        });
+        })}` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                <div class="metrics-grid">
+                    ${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
+            const entity = this._entity_states.get(key);
+            if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
+            const value = entity.state;
+            const unit = entity.attributes.unit_of_measurement ?? "";
+            const problem = this._entity_states.get(problem_key)?.state === "on";
+            return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+                            <div class="metric-tile" @click="${()=>this._moreInfo(key)}">
+                                <ha-icon
+                                    .icon=${icon}
+                                    ?data-color=${problem}
+                                    style="${problem ? "--color: var(--error-color, Tomato);" : ""}"
+                                ></ha-icon>
+                                <span>${value} ${unit}</span>
+                            </div>
+                        `;
+        })}
+                </div>
+            `;
         // return card
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
             <ha-card>
@@ -949,7 +1007,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                             </div>
                         </div>
 
-                        ${metric_rows}
+                        ${metrics_section}
 
                         <ha-button
                             @click="${()=>this._handleButton()}"
@@ -1032,7 +1090,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         this._translations_loaded = true;
     }
     constructor(...args){
-        super(...args), this._translations_loaded = false, this._states_updated = true, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
+        super(...args), this._sensor_layout = "grid", this._translations_loaded = false, this._states_updated = true, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
             "button": "Mark as Watered !",
             "cancel": "Cancel",
             "today": "today"
@@ -1051,6 +1109,24 @@ class $d067581fc0d59830$export$2630dac655fddcab extends (0, $ab210b2da7b39b9d$ex
                 selector: {
                     device: {
                         integration: (0, $3cb55e3e7ebd776a$export$a970e6ec17c9a61d)
+                    }
+                }
+            },
+            {
+                name: "sensor_layout",
+                selector: {
+                    select: {
+                        mode: "list",
+                        options: [
+                            {
+                                value: "grid",
+                                label: "Grid"
+                            },
+                            {
+                                value: "list",
+                                label: "List"
+                            }
+                        ]
                     }
                 }
             }
