@@ -618,24 +618,83 @@ const $3cb55e3e7ebd776a$export$31089ea8b3e502e3 = "simple-plant-card";
 const $3cb55e3e7ebd776a$export$112ee299e69fdf7 = "Simple Plant Card";
 const $3cb55e3e7ebd776a$export$ce612590f71e0c8a = "Custom card for simple-plant integration";
 const $3cb55e3e7ebd776a$export$d5e7ce6d07daf10f = "v1.2.3";
-const $3cb55e3e7ebd776a$export$6af2e7fd4d06fd68 = "ndesgranges";
+const $3cb55e3e7ebd776a$export$6af2e7fd4d06fd68 = "idontwantfame";
 
 
 
 const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
     .hidden {
         display: none;
-        /* opacity: 0; */
     }
 
+    /* ── Card shell ─────────────────────────────────────────────────── */
+
     .card-content {
-        padding: 0px;
+        padding: 0;
         position: relative;
+        overflow: hidden;
+        border-radius: var(--ha-card-border-radius, 12px);
     }
+
+    /* ── Background image ───────────────────────────────────────────── */
+
+    hui-image {
+        display: none; /* only shown via .has-image */
+    }
+
+    .has-image hui-image {
+        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* ── Content overlay ────────────────────────────────────────────── */
 
     .info {
         padding: 16px;
+        position: relative;
+        z-index: 1;
     }
+
+    /* Push content down so the top of the photo shows through */
+    .has-image .info {
+        padding-top: 96px;
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.85) 0%,
+            rgba(0, 0, 0, 0.6)  35%,
+            rgba(0, 0, 0, 0.15) 65%,
+            transparent         100%
+        );
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    .has-image h1,
+    .has-image .content p,
+    .has-image .metric-tile span {
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    /* ── Typography ─────────────────────────────────────────────────── */
+
+    h1 {
+        font-weight: normal;
+        font-size: 24px;
+        margin-top: 8px;
+        margin-bottom: 0;
+        line-height: 24px;
+        height: 48px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    /* ── Rows ───────────────────────────────────────────────────────── */
 
     .row {
         display: flex;
@@ -658,42 +717,30 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 
     .sub {
         position: absolute;
-        top:0;
+        top: 0;
         left: 0;
         transform: translateY(100%);
         color: var(--secondary-text-color);
         font-size: 12px;
     }
 
-
-    h1 {
-        font-weight: normal;
-        font-size: 24px;
-
-        margin-top: 8px;
-        margin-bottom: 0px;
-        line-height: 24px;
-        height: 48px;
-
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        line-clamp: 2;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-
-    hui-image {
-        aspect-ratio: 1 / 1;
-        border-radius: var(--ha-card-border-radius,12px);
-        overflow: hidden;
-    }
+    /* ── Buttons ────────────────────────────────────────────────────── */
 
     ha-button {
         width: 100%;
         margin-top: 8px;
     }
 
+    ha-icon-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: rgba(var(--rgb-card-background-color), 0.2);
+        border-radius: 48px;
+        z-index: 2;
+    }
+
+    /* ── Icons ──────────────────────────────────────────────────────── */
 
     ha-icon {
         display: flex;
@@ -704,15 +751,17 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
         color: var(--color);
     }
 
-
-
-    ha-icon-button {
+    ha-icon-button ha-icon::after {
+        content: attr(data-days, "");
         position: absolute;
-        bottom: 8px;
-        right: 8px;
-        background-color: rgba(var(--rgb-card-background-color), 0.2);
-        border-radius: 48px;
+        top: calc(50% + 1px);
+        left: 0;
+        transform: translateY(-50%);
+        width: 100%;
+        font-size: 10px;
     }
+
+    /* ── Metrics ────────────────────────────────────────────────────── */
 
     .metrics-grid {
         display: flex;
@@ -736,16 +785,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
         color: var(--secondary-text-color);
         text-align: center;
         white-space: nowrap;
-    }
-
-    ha-icon-button ha-icon::after {
-        content: attr(data-days, "");
-        position: absolute;
-        top: calc( 50% + 1px );
-        left: 0px;
-        transform: translateY(-50%);
-        width: 100%;
-        font-size: 10px;
     }
 `;
 
@@ -965,22 +1004,24 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         // return card
         return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
             <ha-card>
-                <div class="card-content">
-                    <div class="img-header"></div>
+                <div class="card-content ${this._entity_ids['picture'] ? 'has-image' : ''}">
+                    ${this._entity_ids["picture"] ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                         <hui-image
                             .hass=${this._hass}
                             .entity=${this._entity_ids["picture"]}
                             .fitMode=${"cover"}
                             @click="${()=>this._moreInfo("picture")}"
                         ></hui-image>
-                        <ha-icon-button
-                            .label=${days_between_label}
-                            @click="${()=>this._moreInfo("days_between_waterings")}"
-                        >
-                            <ha-icon
-                                data-days="${days_between_value}"
-                                .icon=${"mdi:calendar-blank"}></ha-icon>
-                        </ha-icon-button>
+                    ` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``}
+                    <ha-icon-button
+                        .label=${days_between_label}
+                        @click="${()=>this._moreInfo("days_between_waterings")}"
+                    >
+                        <ha-icon
+                            data-days="${days_between_value}"
+                            .icon=${"mdi:calendar-blank"}
+                        ></ha-icon>
+                    </ha-icon-button>
                     <div class="info">
                         <h1 @click="${()=>this._navigateToDevice(this._device_id)}">
                             ${this._device_name}

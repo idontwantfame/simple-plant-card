@@ -209,23 +209,24 @@ export class SimplePlantCard extends LitElement {
         // return card
         return html`
             <ha-card>
-                <div class="card-content">
-                    <div class="img-header"></div>
+                <div class="card-content ${this._entity_ids['picture'] ? 'has-image' : ''}">
+                    ${this._entity_ids["picture"] ? html`
                         <hui-image
                             .hass=${this._hass}
                             .entity=${this._entity_ids["picture"]}
                             .fitMode=${"cover"}
                             @click="${() => this._moreInfo("picture")}"
                         ></hui-image>
-                        <ha-icon-button
-                            .label=${days_between_label}
-                            @click="${() => this._moreInfo("days_between_waterings")}"
-                        >
-                            <ha-icon
-                                data-days="${days_between_value}"
-                                .icon=${"mdi:calendar-blank"
-                            }></ha-icon>
-                        </ha-icon-button>
+                    ` : html``}
+                    <ha-icon-button
+                        .label=${days_between_label}
+                        @click="${() => this._moreInfo("days_between_waterings")}"
+                    >
+                        <ha-icon
+                            data-days="${days_between_value}"
+                            .icon=${"mdi:calendar-blank"}
+                        ></ha-icon>
+                    </ha-icon-button>
                     <div class="info">
                         <h1 @click="${() => this._navigateToDevice(this._device_id)}">
                             ${this._device_name}

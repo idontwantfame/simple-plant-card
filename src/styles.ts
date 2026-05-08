@@ -3,17 +3,76 @@ import { css } from "lit";
 export const styles = css`
     .hidden {
         display: none;
-        /* opacity: 0; */
     }
 
+    /* ── Card shell ─────────────────────────────────────────────────── */
+
     .card-content {
-        padding: 0px;
+        padding: 0;
         position: relative;
+        overflow: hidden;
+        border-radius: var(--ha-card-border-radius, 12px);
     }
+
+    /* ── Background image ───────────────────────────────────────────── */
+
+    hui-image {
+        display: none; /* only shown via .has-image */
+    }
+
+    .has-image hui-image {
+        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* ── Content overlay ────────────────────────────────────────────── */
 
     .info {
         padding: 16px;
+        position: relative;
+        z-index: 1;
     }
+
+    /* Push content down so the top of the photo shows through */
+    .has-image .info {
+        padding-top: 96px;
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.85) 0%,
+            rgba(0, 0, 0, 0.6)  35%,
+            rgba(0, 0, 0, 0.15) 65%,
+            transparent         100%
+        );
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    .has-image h1,
+    .has-image .content p,
+    .has-image .metric-tile span {
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    /* ── Typography ─────────────────────────────────────────────────── */
+
+    h1 {
+        font-weight: normal;
+        font-size: 24px;
+        margin-top: 8px;
+        margin-bottom: 0;
+        line-height: 24px;
+        height: 48px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    /* ── Rows ───────────────────────────────────────────────────────── */
 
     .row {
         display: flex;
@@ -36,42 +95,30 @@ export const styles = css`
 
     .sub {
         position: absolute;
-        top:0;
+        top: 0;
         left: 0;
         transform: translateY(100%);
         color: var(--secondary-text-color);
         font-size: 12px;
     }
 
-
-    h1 {
-        font-weight: normal;
-        font-size: 24px;
-
-        margin-top: 8px;
-        margin-bottom: 0px;
-        line-height: 24px;
-        height: 48px;
-
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        line-clamp: 2;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-
-    hui-image {
-        aspect-ratio: 1 / 1;
-        border-radius: var(--ha-card-border-radius,12px);
-        overflow: hidden;
-    }
+    /* ── Buttons ────────────────────────────────────────────────────── */
 
     ha-button {
         width: 100%;
         margin-top: 8px;
     }
 
+    ha-icon-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: rgba(var(--rgb-card-background-color), 0.2);
+        border-radius: 48px;
+        z-index: 2;
+    }
+
+    /* ── Icons ──────────────────────────────────────────────────────── */
 
     ha-icon {
         display: flex;
@@ -82,15 +129,17 @@ export const styles = css`
         color: var(--color);
     }
 
-
-
-    ha-icon-button {
+    ha-icon-button ha-icon::after {
+        content: attr(data-days, "");
         position: absolute;
-        bottom: 8px;
-        right: 8px;
-        background-color: rgba(var(--rgb-card-background-color), 0.2);
-        border-radius: 48px;
+        top: calc(50% + 1px);
+        left: 0;
+        transform: translateY(-50%);
+        width: 100%;
+        font-size: 10px;
     }
+
+    /* ── Metrics ────────────────────────────────────────────────────── */
 
     .metrics-grid {
         display: flex;
@@ -114,15 +163,5 @@ export const styles = css`
         color: var(--secondary-text-color);
         text-align: center;
         white-space: nowrap;
-    }
-
-    ha-icon-button ha-icon::after {
-        content: attr(data-days, "");
-        position: absolute;
-        top: calc( 50% + 1px );
-        left: 0px;
-        transform: translateY(-50%);
-        width: 100%;
-        font-size: 10px;
     }
 `
