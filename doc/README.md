@@ -2,7 +2,7 @@
 
 If you are a developper, this is your entry point.
 
->This documentation is about the `simple-plant-card` custom dashboard card. If you are looking for information about the `simple-plant` custom device integration, take a look at [@ndesgranges/simple-plant](https://github.com/ndesgranges/simple-plant)
+>This documentation is about the `simple-plant-card` custom dashboard card. If you are looking for information about the `simple-plant` custom device integration, take a look at [@idontwantfame/simple-plant](https://github.com/idontwantfame/simple-plant)
 
 ## Files and folders
 

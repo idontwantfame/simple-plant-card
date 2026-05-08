@@ -4,11 +4,11 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
-Simple Plant Card is a custom dashboard card for the [Simple Plant integration](https://github.com/ndesgranges/simple-plant)
+Simple Plant Card is a custom dashboard card for the [Simple Plant integration](https://github.com/idontwantfame/simple-plant)
 
 This repository exists only to allow installation through HACS (which does not allow both an integration and custom card in the same repository)
 
-For any issue regarding this custom card, please report it in [the main repository](https://github.com/ndesgranges/simple-plant).
+For any issue regarding this custom card, please report it in [the main repository](https://github.com/idontwantfame/simple-plant).
 
 ## Installation
 
@@ -21,6 +21,6 @@ OR
 2. Open HACS in Home Assistant
 3. On the top right side, click the three dot and click `Custom repositories`
 4. Where asked for a URL, paste the link of this repository:
-https://github.com/ndesgranges/simple-plant-card
+https://github.com/idontwantfame/simple-plant-card
 1. Where asked for a type, select `dashboard`
 2. Click the download button. ⬇️

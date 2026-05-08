@@ -5,5 +5,5 @@ export const CARD_NAME="Simple Plant Card";
 export const CARD_DESCRIPTION="Custom card for simple-plant integration";
 
 export const CARD_VERSION="v1.2.3";
-export const CARD_AUTHOR="ndesgranges";
+export const CARD_AUTHOR = "idontwantfame";
 
