@@ -245,8 +245,6 @@ export class SimplePlantCard extends LitElement {
                                 <p class="${late_class}">${this._translations["late"]} !</p>
                                 <p class="${next_watering_class}">${next_watering}</p>
                             </div>
-                        </div>
-                        <div class="row">
                             <ha-icon
                                 .icon=${"mdi:heart-pulse"}
                                 data-color
@@ -283,10 +281,10 @@ export class SimplePlantCard extends LitElement {
     getGridOptions() {
         return {
             columns: 6,
-            min_columns: 6,
-            max_columns: 9,
-            min_rows: 8,
-            max_rows: 8,
+            min_columns: 4,
+            max_columns: 12,
+            min_rows: 4,
+            max_rows: 16,
         };
     }
 

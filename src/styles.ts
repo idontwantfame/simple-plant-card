@@ -85,6 +85,8 @@ export const styles = css`
     .content {
         position: relative;
         overflow: hidden;
+        flex: 1;
+        min-width: 0;
     }
 
     .content p {

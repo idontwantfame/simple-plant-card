@@ -707,6 +707,8 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     .content {
         position: relative;
         overflow: hidden;
+        flex: 1;
+        min-width: 0;
     }
 
     .content p {
@@ -1039,8 +1041,6 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                                 <p class="${late_class}">${this._translations["late"]} !</p>
                                 <p class="${next_watering_class}">${next_watering}</p>
                             </div>
-                        </div>
-                        <div class="row">
                             <ha-icon
                                 .icon=${"mdi:heart-pulse"}
                                 data-color
@@ -1073,10 +1073,10 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
     getGridOptions() {
         return {
             columns: 6,
-            min_columns: 6,
-            max_columns: 9,
-            min_rows: 8,
-            max_rows: 8
+            min_columns: 4,
+            max_columns: 12,
+            min_rows: 4,
+            max_rows: 16
         };
     }
     // Specific to Simple Plant
