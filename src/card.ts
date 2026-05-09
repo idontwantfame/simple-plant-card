@@ -9,6 +9,7 @@ import { HomeAssistant2, Dictionary, Entity, relativeDate } from "./helpers"
 export interface SimplePlantCardConfig extends LovelaceCardConfig {
   device: string;
   sensor_layout?: "grid" | "list";
+  sensor_columns?: number;
 }
 
 export class SimplePlantCard extends LitElement {
@@ -19,6 +20,7 @@ export class SimplePlantCard extends LitElement {
     // reactive
     private _device_id: string;
     private _sensor_layout: string = "grid";
+    private _sensor_columns: number = 5;
     private _translations_loaded: boolean = false;
     private _states_updated: boolean = true ;
 
@@ -80,6 +82,7 @@ export class SimplePlantCard extends LitElement {
     static properties = {
         _device_id: { type: String, state: true },
         _sensor_layout: { type: String, state: true },
+        _sensor_columns: { type: Number, state: true },
         _translations_loaded: { type: Boolean, state: true },
         _states_updated: {
             type: Boolean,
@@ -99,6 +102,7 @@ export class SimplePlantCard extends LitElement {
         }
         this._device_id = config.device;
         this._sensor_layout = config.sensor_layout ?? "grid";
+        this._sensor_columns = config.sensor_columns ?? 5;
         // while editing the entity in the card editor
         if (this._hass) {
             this.hass = this._hass
@@ -185,7 +189,7 @@ export class SimplePlantCard extends LitElement {
                 `
             })}`
             : html`
-                <div class="metrics-grid">
+                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns};">
                     ${configured_metrics.map(({key, problem_key, icon}) => {
                         const entity = this._entity_states.get(key)
                         if (!entity) return html``

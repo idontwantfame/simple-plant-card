@@ -764,8 +764,8 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     /* ── Metrics ────────────────────────────────────────────────────── */
 
     .metrics-grid {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(var(--sensor-columns, 5), 1fr);
         gap: 8px;
         margin-top: 8px;
     }
@@ -774,8 +774,6 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
         display: flex;
         flex-direction: column;
         align-items: center;
-        flex: 1 1 0;
-        min-width: 40px;
         cursor: pointer;
         gap: 2px;
     }
@@ -889,6 +887,10 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                 type: String,
                 state: true
             },
+            _sensor_columns: {
+                type: Number,
+                state: true
+            },
             _translations_loaded: {
                 type: Boolean,
                 state: true
@@ -911,6 +913,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         if (!config.device) throw new Error("You need to define a name");
         this._device_id = config.device;
         this._sensor_layout = config.sensor_layout ?? "grid";
+        this._sensor_columns = config.sensor_columns ?? 5;
         // while editing the entity in the card editor
         if (this._hass) this.hass = this._hass;
         this._config_updated = true;
@@ -981,7 +984,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                     </div>
                 `;
         })}` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                <div class="metrics-grid">
+                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns};">
                     ${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
@@ -1131,7 +1134,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         this._translations_loaded = true;
     }
     constructor(...args){
-        super(...args), this._sensor_layout = "grid", this._translations_loaded = false, this._states_updated = true, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
+        super(...args), this._sensor_layout = "grid", this._sensor_columns = 5, this._translations_loaded = false, this._states_updated = true, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
             "button": "Mark as Watered !",
             "cancel": "Cancel",
             "today": "today"
@@ -1147,6 +1150,7 @@ class $d067581fc0d59830$export$2630dac655fddcab extends (0, $ab210b2da7b39b9d$ex
         this.schema = [
             {
                 name: "device",
+                label: "Device",
                 selector: {
                     device: {
                         integration: (0, $3cb55e3e7ebd776a$export$a970e6ec17c9a61d)
@@ -1155,6 +1159,7 @@ class $d067581fc0d59830$export$2630dac655fddcab extends (0, $ab210b2da7b39b9d$ex
             },
             {
                 name: "sensor_layout",
+                label: "Sensor layout",
                 selector: {
                     select: {
                         mode: "list",
@@ -1168,6 +1173,18 @@ class $d067581fc0d59830$export$2630dac655fddcab extends (0, $ab210b2da7b39b9d$ex
                                 label: "List"
                             }
                         ]
+                    }
+                }
+            },
+            {
+                name: "sensor_columns",
+                label: "Grid columns",
+                selector: {
+                    number: {
+                        min: 2,
+                        max: 5,
+                        step: 1,
+                        mode: "box"
                     }
                 }
             }
@@ -1187,20 +1204,20 @@ class $d067581fc0d59830$export$2630dac655fddcab extends (0, $ab210b2da7b39b9d$ex
     setConfig(config) {
         this._config = config;
     }
-    // This function is called when the input element of the editor loses focus
     _valueChanged(ev) {
         if (!this._config || !this._hass) return;
-        const _config = Object.assign({}, this._config);
-        _config.device = ev.detail.value.device;
+        const _config = {
+            ...this._config,
+            ...ev.detail.value
+        };
         this._config = _config;
-        const event = new CustomEvent("config-changed", {
+        this.dispatchEvent(new CustomEvent("config-changed", {
             detail: {
                 config: _config
             },
             bubbles: true,
             composed: true
-        });
-        this.dispatchEvent(event);
+        }));
     }
     render() {
         if (!this._hass || !this._config) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<div>Invalid</div>`;
@@ -1216,11 +1233,8 @@ class $d067581fc0d59830$export$2630dac655fddcab extends (0, $ab210b2da7b39b9d$ex
     }
     constructor(...args){
         super(...args), this._computeLabel = (schema)=>{
-            let label = this.hass?.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
-            if (label) return label;
-            label = this.hass?.localize(`ui.panel.lovelace.editor.card.${schema.label}`);
-            if (label) return label;
-            return schema.label;
+            const localized = this.hass?.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
+            return localized || schema.label;
         };
     }
 }

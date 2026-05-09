@@ -142,8 +142,8 @@ export const styles = css`
     /* ── Metrics ────────────────────────────────────────────────────── */
 
     .metrics-grid {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(var(--sensor-columns, 5), 1fr);
         gap: 8px;
         margin-top: 8px;
     }
@@ -152,8 +152,6 @@ export const styles = css`
         display: flex;
         flex-direction: column;
         align-items: center;
-        flex: 1 1 0;
-        min-width: 40px;
         cursor: pointer;
         gap: 2px;
     }

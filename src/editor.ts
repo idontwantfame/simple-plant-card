@@ -9,11 +9,12 @@ export class SimplePlantCardEditor extends LitElement {
     private _config : LovelaceCardConfig;
 
     static schema = [
-        {name: "device", selector: { device: { integration: INTEGRATION} }},
-        {name: "sensor_layout", selector: { select: { mode: "list", options: [
+        {name: "device",         label: "Device",          selector: { device: { integration: INTEGRATION} }},
+        {name: "sensor_layout",  label: "Sensor layout",   selector: { select: { mode: "list", options: [
             {value: "grid", label: "Grid"},
             {value: "list", label: "List"},
         ]}}},
+        {name: "sensor_columns", label: "Grid columns",    selector: { number: { min: 2, max: 5, step: 1, mode: "box" }}},
     ]
 
     static properties = {
@@ -29,30 +30,20 @@ export class SimplePlantCardEditor extends LitElement {
         this._config = config;
     }
 
-    // This function is called when the input element of the editor loses focus
     _valueChanged(ev: CustomEvent) {
-        if (!this._config || !this._hass) {
-        return;
-        }
-        const _config = Object.assign({}, this._config);
-        _config.device = ev.detail.value.device;
-
+        if (!this._config || !this._hass) return;
+        const _config = { ...this._config, ...ev.detail.value };
         this._config = _config;
-
-        const event = new CustomEvent("config-changed", {
-        detail: { config: _config },
-        bubbles: true,
-        composed: true,
-        });
-        this.dispatchEvent(event);
+        this.dispatchEvent(new CustomEvent("config-changed", {
+            detail: { config: _config },
+            bubbles: true,
+            composed: true,
+        }));
     }
 
     private _computeLabel = (schema: any) => {
-        let label = this.hass?.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
-        if (label) return label;
-        label = this.hass?.localize(`ui.panel.lovelace.editor.card.${schema.label}`);
-        if (label) return label;
-        return schema.label;
+        const localized = this.hass?.localize(`ui.panel.lovelace.editor.card.generic.${schema.name}`);
+        return localized || schema.label;
     };
 
     render() {
