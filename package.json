@@ -2,6 +2,7 @@
     "source": "src/simple-plant.ts",
     "module": "dist/simple-plant-card.js",
     "scripts": {
+        "test": "node --test",
         "watch": "parcel watch",
         "build": "parcel build"
     },

@@ -14,7 +14,6 @@ export class SimplePlantCardEditor extends LitElement {
             {value: "grid", label: "Grid"},
             {value: "list", label: "List"},
         ]}}},
-        {name: "sensor_columns", label: "Grid columns",    selector: { number: { min: 2, max: 5, step: 1, mode: "box" }}},
     ]
 
     static properties = {
@@ -62,4 +61,3 @@ export class SimplePlantCardEditor extends LitElement {
         `;
     }
 }
-

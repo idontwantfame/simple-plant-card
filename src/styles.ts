@@ -1,10 +1,6 @@
 import { css } from "lit";
 
 export const styles = css`
-    .hidden {
-        display: none;
-    }
-
     /* ── Card shell ─────────────────────────────────────────────────── */
 
     .card-content {
@@ -95,18 +91,14 @@ export const styles = css`
         white-space: nowrap;
     }
 
-    .sub {
-        position: absolute;
-        top: 0;
-        left: 0;
-        transform: translateY(100%);
-        color: var(--secondary-text-color);
-        font-size: 12px;
-    }
-
     /* ── Buttons ────────────────────────────────────────────────────── */
 
     .progress-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
         width: 100%;
         margin-top: 8px;
         padding: 10px 16px;
@@ -152,6 +144,23 @@ export const styles = css`
     .progress-button:hover  { filter: brightness(1.1); }
     .progress-button:active { filter: brightness(0.9); }
 
+    .button-label,
+    .button-detail {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .button-detail {
+        font-size: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0;
+        text-transform: none;
+        opacity: 0.85;
+    }
+
     ha-icon-button {
         position: absolute;
         top: 8px;
@@ -186,7 +195,7 @@ export const styles = css`
 
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(var(--sensor-columns, 5), 1fr);
+        grid-template-columns: repeat(var(--metric-columns, 5), minmax(0, 1fr));
         gap: 8px;
         margin-top: 8px;
     }

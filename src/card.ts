@@ -9,7 +9,6 @@ import { HomeAssistant2, Dictionary, Entity, relativeDate, relativeDays } from "
 export interface SimplePlantCardConfig extends LovelaceCardConfig {
   device: string;
   sensor_layout?: "grid" | "list";
-  sensor_columns?: number;
 }
 
 export class SimplePlantCard extends LitElement {
@@ -20,7 +19,6 @@ export class SimplePlantCard extends LitElement {
     // reactive
     private _device_id: string;
     private _sensor_layout: string = "grid";
-    private _sensor_columns: number = 0;
     private _confirming: boolean = false;
     private _translations_loaded: boolean = false;
     private _states_updated: boolean = true ;
@@ -73,6 +71,7 @@ export class SimplePlantCard extends LitElement {
         { key: "illuminance",  problem_key: "illuminance_problem",  icon: "mdi:weather-sunny" },
         { key: "conductivity", problem_key: "conductivity_problem", icon: "mdi:sprout" },
         { key: "battery",      problem_key: "battery_problem",      icon: "mdi:battery" },
+        { key: "health",       problem_key: "problem",              icon: "mdi:heart-pulse" },
     ]
 
     set hass(hass : HomeAssistant2) {
@@ -85,7 +84,6 @@ export class SimplePlantCard extends LitElement {
     static properties = {
         _device_id: { type: String, state: true },
         _sensor_layout: { type: String, state: true },
-        _sensor_columns: { type: Number, state: true },
         _confirming: { type: Boolean, state: true },
         _translations_loaded: { type: Boolean, state: true },
         _states_updated: {
@@ -106,7 +104,6 @@ export class SimplePlantCard extends LitElement {
         }
         this._device_id = config.device;
         this._sensor_layout = config.sensor_layout ?? "grid";
-        this._sensor_columns = config.sensor_columns ?? 0;
         // while editing the entity in the card editor
         if (this._hass) {
             this.hass = this._hass
@@ -150,7 +147,6 @@ export class SimplePlantCard extends LitElement {
         const health_key_prefix = "component.simple_plant.entity.select.health.state"
         const health_key = `${health_key_prefix}.${this._entity_states.get("health").state}`
         const health = this._hass.localize(health_key)
-        const healthColor = this._entity_states.get("health").attributes.color
 
         const days_between_label = this._entity_states.get("days_between_waterings").attributes.friendly_name
         const days_between_value = parseInt(this._entity_states.get("days_between_waterings").state)
@@ -159,11 +155,8 @@ export class SimplePlantCard extends LitElement {
         const next_date = this._entity_states.get("next_watering").state;
         const today = this._translations["today"];
         const next_watering = relativeDate(next_date, local, today);
-        const watering_can_color = this._entity_states.get("next_watering").attributes.color
 
         const late = this._entity_states.get("problem").state === "on";
-        const next_watering_class = late ? "sub" : "";
-        const late_class = late ? "" : "hidden";
 
         const last_date = this._entity_states.get("last_watered").state;
         const last_watered = relativeDate(last_date, local, today)
@@ -171,6 +164,11 @@ export class SimplePlantCard extends LitElement {
         const button_label = this._confirming
             ? "Are you sure?"
             : is_cancel ? this._translations["cancel"] : this._translations["button"]
+        const button_detail = this._confirming
+            ? ""
+            : late
+                ? this._translations["late"]
+                : next_watering
 
         const days_since_watered = Math.max(-relativeDays(last_date), 0)
         const progress = Math.min(days_since_watered / days_between_value, 1)
@@ -181,15 +179,17 @@ export class SimplePlantCard extends LitElement {
             ? html`${configured_metrics.map(({key, problem_key, icon}) => {
                 const entity = this._entity_states.get(key)
                 if (!entity) return html``
-                const value = entity.state
+                const value = key === "health" ? health : entity.state
                 const unit = entity.attributes.unit_of_measurement ?? ""
                 const problem = this._entity_states.get(problem_key)?.state === "on"
+                const hasColor = problem || key === "health"
+                const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)"
                 return html`
                     <div class="row">
                         <ha-icon
                             .icon=${icon}
-                            ?data-color=${problem}
-                            style="${problem ? "--color: var(--error-color, Tomato);" : ""}"
+                            ?data-color=${hasColor}
+                            style="${hasColor ? `--color: ${color};` : ""}"
                             @click="${() => this._moreInfo(key)}"
                         ></ha-icon>
                         <div class="content" @click="${() => this._moreInfo(key)}">
@@ -199,19 +199,21 @@ export class SimplePlantCard extends LitElement {
                 `
             })}`
             : html`
-                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns || configured_metrics.length};">
+                <div class="metrics-grid" style="--metric-columns: ${configured_metrics.length};">
                     ${configured_metrics.map(({key, problem_key, icon}) => {
                         const entity = this._entity_states.get(key)
                         if (!entity) return html``
-                        const value = entity.state
+                        const value = key === "health" ? health : entity.state
                         const unit = entity.attributes.unit_of_measurement ?? ""
                         const problem = this._entity_states.get(problem_key)?.state === "on"
+                        const hasColor = problem || key === "health"
+                        const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)"
                         return html`
                             <div class="metric-tile" @click="${() => this._moreInfo(key)}">
                                 <ha-icon
                                     .icon=${icon}
-                                    ?data-color=${problem}
-                                    style="${problem ? "--color: var(--error-color, Tomato);" : ""}"
+                                    ?data-color=${hasColor}
+                                    style="${hasColor ? `--color: ${color};` : ""}"
                                 ></ha-icon>
                                 <span>${value} ${unit}</span>
                             </div>
@@ -245,25 +247,6 @@ export class SimplePlantCard extends LitElement {
                         <h1 @click="${() => this._navigateToDevice(this._device_id)}">
                             ${this._device_name}
                         </h1>
-                        <div class="row">
-                            <ha-icon
-                                data-color
-                                style="--color: ${watering_can_color};"
-                                .icon=${"mdi:watering-can"}
-                            ></ha-icon>
-                            <div class="content" @click="${() => this._moreInfo("last_watered")}">
-                                <p class="${late_class}">${this._translations["late"]} !</p>
-                                <p class="${next_watering_class}">${next_watering}</p>
-                            </div>
-                            <ha-icon
-                                .icon=${"mdi:heart-pulse"}
-                                data-color
-                                style="--color: ${healthColor};"
-                            ></ha-icon>
-                            <div class="content" @click="${() => this._moreInfo("health")}">
-                                <p>${health}</p>
-                            </div>
-                        </div>
 
                         ${metrics_section}
 
@@ -271,7 +254,10 @@ export class SimplePlantCard extends LitElement {
                             class="progress-button ${late ? 'overdue' : ''} ${this._confirming ? 'confirming' : ''}"
                             style="--progress: ${Math.round(progress * 100)}%"
                             @click="${() => this._handleButton()}"
-                        >${button_label}</button>
+                        >
+                            <span class="button-label">${button_label}</span>
+                            ${button_detail ? html`<span class="button-detail">${button_detail}</span>` : html``}
+                        </button>
                     </div>
                 </div>
             </ha-card>

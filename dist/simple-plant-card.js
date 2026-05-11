@@ -623,10 +623,6 @@ const $3cb55e3e7ebd776a$export$6af2e7fd4d06fd68 = "idontwantfame";
 
 
 const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$dbf350e5966cf602)`
-    .hidden {
-        display: none;
-    }
-
     /* ── Card shell ─────────────────────────────────────────────────── */
 
     .card-content {
@@ -717,18 +713,14 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
         white-space: nowrap;
     }
 
-    .sub {
-        position: absolute;
-        top: 0;
-        left: 0;
-        transform: translateY(100%);
-        color: var(--secondary-text-color);
-        font-size: 12px;
-    }
-
     /* ── Buttons ────────────────────────────────────────────────────── */
 
     .progress-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
         width: 100%;
         margin-top: 8px;
         padding: 10px 16px;
@@ -774,6 +766,23 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
     .progress-button:hover  { filter: brightness(1.1); }
     .progress-button:active { filter: brightness(0.9); }
 
+    .button-label,
+    .button-detail {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .button-detail {
+        font-size: 0.75rem;
+        font-weight: 400;
+        letter-spacing: 0;
+        text-transform: none;
+        opacity: 0.85;
+    }
+
     ha-icon-button {
         position: absolute;
         top: 8px;
@@ -808,7 +817,7 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(var(--sensor-columns, 5), 1fr);
+        grid-template-columns: repeat(var(--metric-columns, 5), minmax(0, 1fr));
         gap: 8px;
         margin-top: 8px;
     }
@@ -911,6 +920,11 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                 key: "battery",
                 problem_key: "battery_problem",
                 icon: "mdi:battery"
+            },
+            {
+                key: "health",
+                problem_key: "problem",
+                icon: "mdi:heart-pulse"
             }
         ];
     }
@@ -928,10 +942,6 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
             },
             _sensor_layout: {
                 type: String,
-                state: true
-            },
-            _sensor_columns: {
-                type: Number,
                 state: true
             },
             _confirming: {
@@ -960,7 +970,6 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         if (!config.device) throw new Error("You need to define a name");
         this._device_id = config.device;
         this._sensor_layout = config.sensor_layout ?? "grid";
-        this._sensor_columns = config.sensor_columns ?? 0;
         // while editing the entity in the card editor
         if (this._hass) this.hass = this._hass;
         this._config_updated = true;
@@ -996,36 +1005,35 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const health_key_prefix = "component.simple_plant.entity.select.health.state";
         const health_key = `${health_key_prefix}.${this._entity_states.get("health").state}`;
         const health = this._hass.localize(health_key);
-        const healthColor = this._entity_states.get("health").attributes.color;
         const days_between_label = this._entity_states.get("days_between_waterings").attributes.friendly_name;
         const days_between_value = parseInt(this._entity_states.get("days_between_waterings").state);
         const local = this._hass.language;
         const next_date = this._entity_states.get("next_watering").state;
         const today = this._translations["today"];
         const next_watering = (0, $feccc7a5980a21d5$export$6270e84457db9b38)(next_date, local, today);
-        const watering_can_color = this._entity_states.get("next_watering").attributes.color;
         const late = this._entity_states.get("problem").state === "on";
-        const next_watering_class = late ? "sub" : "";
-        const late_class = late ? "" : "hidden";
         const last_date = this._entity_states.get("last_watered").state;
         const last_watered = (0, $feccc7a5980a21d5$export$6270e84457db9b38)(last_date, local, today);
         const is_cancel = last_watered === today;
         const button_label = this._confirming ? "Are you sure?" : is_cancel ? this._translations["cancel"] : this._translations["button"];
+        const button_detail = this._confirming ? "" : late ? this._translations["late"] : next_watering;
         const days_since_watered = Math.max(-(0, $feccc7a5980a21d5$export$f31e827513f08f84)(last_date), 0);
         const progress = Math.min(days_since_watered / days_between_value, 1);
         const configured_metrics = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]);
         const metrics_section = configured_metrics.length === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`` : this._sensor_layout === "list" ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
-            const value = entity.state;
+            const value = key === "health" ? health : entity.state;
             const unit = entity.attributes.unit_of_measurement ?? "";
             const problem = this._entity_states.get(problem_key)?.state === "on";
+            const hasColor = problem || key === "health";
+            const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)";
             return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                     <div class="row">
                         <ha-icon
                             .icon=${icon}
-                            ?data-color=${problem}
-                            style="${problem ? "--color: var(--error-color, Tomato);" : ""}"
+                            ?data-color=${hasColor}
+                            style="${hasColor ? `--color: ${color};` : ""}"
                             @click="${()=>this._moreInfo(key)}"
                         ></ha-icon>
                         <div class="content" @click="${()=>this._moreInfo(key)}">
@@ -1034,19 +1042,21 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                     </div>
                 `;
         })}` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns || configured_metrics.length};">
+                <div class="metrics-grid" style="--metric-columns: ${configured_metrics.length};">
                     ${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
-            const value = entity.state;
+            const value = key === "health" ? health : entity.state;
             const unit = entity.attributes.unit_of_measurement ?? "";
             const problem = this._entity_states.get(problem_key)?.state === "on";
+            const hasColor = problem || key === "health";
+            const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)";
             return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                             <div class="metric-tile" @click="${()=>this._moreInfo(key)}">
                                 <ha-icon
                                     .icon=${icon}
-                                    ?data-color=${problem}
-                                    style="${problem ? "--color: var(--error-color, Tomato);" : ""}"
+                                    ?data-color=${hasColor}
+                                    style="${hasColor ? `--color: ${color};` : ""}"
                                 ></ha-icon>
                                 <span>${value} ${unit}</span>
                             </div>
@@ -1079,25 +1089,6 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                         <h1 @click="${()=>this._navigateToDevice(this._device_id)}">
                             ${this._device_name}
                         </h1>
-                        <div class="row">
-                            <ha-icon
-                                data-color
-                                style="--color: ${watering_can_color};"
-                                .icon=${"mdi:watering-can"}
-                            ></ha-icon>
-                            <div class="content" @click="${()=>this._moreInfo("last_watered")}">
-                                <p class="${late_class}">${this._translations["late"]} !</p>
-                                <p class="${next_watering_class}">${next_watering}</p>
-                            </div>
-                            <ha-icon
-                                .icon=${"mdi:heart-pulse"}
-                                data-color
-                                style="--color: ${healthColor};"
-                            ></ha-icon>
-                            <div class="content" @click="${()=>this._moreInfo("health")}">
-                                <p>${health}</p>
-                            </div>
-                        </div>
 
                         ${metrics_section}
 
@@ -1105,7 +1096,10 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                             class="progress-button ${late ? 'overdue' : ''} ${this._confirming ? 'confirming' : ''}"
                             style="--progress: ${Math.round(progress * 100)}%"
                             @click="${()=>this._handleButton()}"
-                        >${button_label}</button>
+                        >
+                            <span class="button-label">${button_label}</span>
+                            ${button_detail ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`<span class="button-detail">${button_detail}</span>` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``}
+                        </button>
                     </div>
                 </div>
             </ha-card>
@@ -1199,7 +1193,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         this._translations_loaded = true;
     }
     constructor(...args){
-        super(...args), this._sensor_layout = "grid", this._sensor_columns = 0, this._confirming = false, this._translations_loaded = false, this._states_updated = true, this._confirmTimeout = null, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
+        super(...args), this._sensor_layout = "grid", this._confirming = false, this._translations_loaded = false, this._states_updated = true, this._confirmTimeout = null, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
             "button": "Mark as Watered !",
             "cancel": "Cancel",
             "today": "today"
@@ -1238,18 +1232,6 @@ class $d067581fc0d59830$export$2630dac655fddcab extends (0, $ab210b2da7b39b9d$ex
                                 label: "List"
                             }
                         ]
-                    }
-                }
-            },
-            {
-                name: "sensor_columns",
-                label: "Grid columns",
-                selector: {
-                    number: {
-                        min: 2,
-                        max: 5,
-                        step: 1,
-                        mode: "box"
                     }
                 }
             }
