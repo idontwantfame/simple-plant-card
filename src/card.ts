@@ -3,7 +3,7 @@ import { html, LitElement } from 'lit';
 import { CARD_TYPE, INTEGRATION } from "./consts"
 import { styles } from "./styles";
 
-import { HomeAssistant2, Dictionary, Entity, relativeDate } from "./helpers"
+import { HomeAssistant2, Dictionary, Entity, relativeDate, relativeDays } from "./helpers"
 
 
 export interface SimplePlantCardConfig extends LovelaceCardConfig {
@@ -20,9 +20,12 @@ export class SimplePlantCard extends LitElement {
     // reactive
     private _device_id: string;
     private _sensor_layout: string = "grid";
-    private _sensor_columns: number = 5;
+    private _sensor_columns: number = 0;
+    private _confirming: boolean = false;
     private _translations_loaded: boolean = false;
     private _states_updated: boolean = true ;
+
+    private _confirmTimeout: number | null = null;
 
     // other private
     private _device_name: string;
@@ -83,6 +86,7 @@ export class SimplePlantCard extends LitElement {
         _device_id: { type: String, state: true },
         _sensor_layout: { type: String, state: true },
         _sensor_columns: { type: Number, state: true },
+        _confirming: { type: Boolean, state: true },
         _translations_loaded: { type: Boolean, state: true },
         _states_updated: {
             type: Boolean,
@@ -102,7 +106,7 @@ export class SimplePlantCard extends LitElement {
         }
         this._device_id = config.device;
         this._sensor_layout = config.sensor_layout ?? "grid";
-        this._sensor_columns = config.sensor_columns ?? 5;
+        this._sensor_columns = config.sensor_columns ?? 0;
         // while editing the entity in the card editor
         if (this._hass) {
             this.hass = this._hass
@@ -163,7 +167,13 @@ export class SimplePlantCard extends LitElement {
 
         const last_date = this._entity_states.get("last_watered").state;
         const last_watered = relativeDate(last_date, local, today)
-        const button_label = last_watered === today ? this._translations["cancel"] : this._translations["button"]
+        const is_cancel = last_watered === today
+        const button_label = this._confirming
+            ? "Are you sure?"
+            : is_cancel ? this._translations["cancel"] : this._translations["button"]
+
+        const days_since_watered = Math.max(-relativeDays(last_date), 0)
+        const progress = Math.min(days_since_watered / days_between_value, 1)
 
         const configured_metrics = SimplePlantCard.metrics.filter(({key}) => this._entity_ids[key])
         const metrics_section = configured_metrics.length === 0 ? html`` :
@@ -189,7 +199,7 @@ export class SimplePlantCard extends LitElement {
                 `
             })}`
             : html`
-                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns};">
+                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns || configured_metrics.length};">
                     ${configured_metrics.map(({key, problem_key, icon}) => {
                         const entity = this._entity_states.get(key)
                         if (!entity) return html``
@@ -257,9 +267,11 @@ export class SimplePlantCard extends LitElement {
 
                         ${metrics_section}
 
-                        <ha-button
+                        <button
+                            class="progress-button ${late ? 'overdue' : ''} ${this._confirming ? 'confirming' : ''}"
+                            style="--progress: ${Math.round(progress * 100)}%"
                             @click="${() => this._handleButton()}"
-                        >${button_label}</ha-button>
+                        >${button_label}</button>
                     </div>
                 </div>
             </ha-card>
@@ -291,6 +303,23 @@ export class SimplePlantCard extends LitElement {
     // Specific to Simple Plant
 
     _handleButton() {
+        const due = this._entity_states.get("todo")?.state === "on"
+        const watered_today = relativeDays(this._entity_states.get("last_watered")?.state) === 0
+
+        if (!due && !watered_today && !this._confirming) {
+            this._confirming = true
+            this._confirmTimeout = window.setTimeout(() => {
+                this._confirming = false
+                this._confirmTimeout = null
+            }, 3000)
+            return
+        }
+
+        if (this._confirmTimeout !== null) {
+            window.clearTimeout(this._confirmTimeout)
+            this._confirmTimeout = null
+        }
+        this._confirming = false
         this._hass.callService("button", "press", {}, {entity_id: this._entity_ids["mark_watered"]})
     }
 

@@ -728,10 +728,51 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
 
     /* ── Buttons ────────────────────────────────────────────────────── */
 
-    ha-button {
+    .progress-button {
         width: 100%;
         margin-top: 8px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: inherit;
+        transition: filter 0.15s;
+        /*
+         * --rgb-primary-color and --rgb-error-color are exposed by HA themes
+         * as raw "R, G, B" values, letting us use rgba() for opacity control
+         * while staying on-theme. Fallbacks cover themes that don't export them.
+         */
+        background: linear-gradient(
+            to right,
+            rgba(var(--rgb-primary-color, 3, 169, 244), 0.85) var(--progress, 0%),
+            rgba(var(--rgb-primary-color, 3, 169, 244), 0.12) var(--progress, 0%)
+        );
     }
+
+    .progress-button.overdue {
+        background: linear-gradient(
+            to right,
+            rgba(var(--rgb-error-color, 176, 0, 32), 0.85) var(--progress, 100%),
+            rgba(var(--rgb-error-color, 176, 0, 32), 0.15) var(--progress, 100%)
+        );
+    }
+
+    .progress-button.confirming {
+        animation: confirm-pulse 0.7s ease-in-out infinite;
+    }
+
+    @keyframes confirm-pulse {
+        0%, 100% { filter: brightness(1); }
+        50%       { filter: brightness(1.25); }
+    }
+
+    .progress-button:hover  { filter: brightness(1.1); }
+    .progress-button:active { filter: brightness(0.9); }
 
     ha-icon-button {
         position: absolute;
@@ -798,13 +839,13 @@ function $feccc7a5980a21d5$var$dateDiffInDays(a, b) {
     const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
-function $feccc7a5980a21d5$var$relativeDays(isoDateString) {
+function $feccc7a5980a21d5$export$f31e827513f08f84(isoDateString) {
     const today = new Date(Date.now());
     const dateB = new Date(Date.parse(isoDateString));
     return $feccc7a5980a21d5$var$dateDiffInDays(today, dateB);
 }
 function $feccc7a5980a21d5$export$6270e84457db9b38(isoDateString, local = "en", today = "today") {
-    const diff_days = $feccc7a5980a21d5$var$relativeDays(isoDateString);
+    const diff_days = $feccc7a5980a21d5$export$f31e827513f08f84(isoDateString);
     const relativeTimeFormat = new Intl.RelativeTimeFormat(local, {
         style: "long"
     });
@@ -893,6 +934,10 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                 type: Number,
                 state: true
             },
+            _confirming: {
+                type: Boolean,
+                state: true
+            },
             _translations_loaded: {
                 type: Boolean,
                 state: true
@@ -915,7 +960,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         if (!config.device) throw new Error("You need to define a name");
         this._device_id = config.device;
         this._sensor_layout = config.sensor_layout ?? "grid";
-        this._sensor_columns = config.sensor_columns ?? 5;
+        this._sensor_columns = config.sensor_columns ?? 0;
         // while editing the entity in the card editor
         if (this._hass) this.hass = this._hass;
         this._config_updated = true;
@@ -964,7 +1009,10 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const late_class = late ? "" : "hidden";
         const last_date = this._entity_states.get("last_watered").state;
         const last_watered = (0, $feccc7a5980a21d5$export$6270e84457db9b38)(last_date, local, today);
-        const button_label = last_watered === today ? this._translations["cancel"] : this._translations["button"];
+        const is_cancel = last_watered === today;
+        const button_label = this._confirming ? "Are you sure?" : is_cancel ? this._translations["cancel"] : this._translations["button"];
+        const days_since_watered = Math.max(-(0, $feccc7a5980a21d5$export$f31e827513f08f84)(last_date), 0);
+        const progress = Math.min(days_since_watered / days_between_value, 1);
         const configured_metrics = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]);
         const metrics_section = configured_metrics.length === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`` : this._sensor_layout === "list" ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
@@ -986,7 +1034,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                     </div>
                 `;
         })}` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns};">
+                <div class="metrics-grid" style="--sensor-columns: ${this._sensor_columns || configured_metrics.length};">
                     ${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
@@ -1053,9 +1101,11 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
 
                         ${metrics_section}
 
-                        <ha-button
+                        <button
+                            class="progress-button ${late ? 'overdue' : ''} ${this._confirming ? 'confirming' : ''}"
+                            style="--progress: ${Math.round(progress * 100)}%"
                             @click="${()=>this._handleButton()}"
-                        >${button_label}</ha-button>
+                        >${button_label}</button>
                     </div>
                 </div>
             </ha-card>
@@ -1081,6 +1131,21 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
     }
     // Specific to Simple Plant
     _handleButton() {
+        const due = this._entity_states.get("todo")?.state === "on";
+        const watered_today = (0, $feccc7a5980a21d5$export$f31e827513f08f84)(this._entity_states.get("last_watered")?.state) === 0;
+        if (!due && !watered_today && !this._confirming) {
+            this._confirming = true;
+            this._confirmTimeout = window.setTimeout(()=>{
+                this._confirming = false;
+                this._confirmTimeout = null;
+            }, 3000);
+            return;
+        }
+        if (this._confirmTimeout !== null) {
+            window.clearTimeout(this._confirmTimeout);
+            this._confirmTimeout = null;
+        }
+        this._confirming = false;
         this._hass.callService("button", "press", {}, {
             entity_id: this._entity_ids["mark_watered"]
         });
@@ -1134,7 +1199,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         this._translations_loaded = true;
     }
     constructor(...args){
-        super(...args), this._sensor_layout = "grid", this._sensor_columns = 5, this._translations_loaded = false, this._states_updated = true, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
+        super(...args), this._sensor_layout = "grid", this._sensor_columns = 0, this._confirming = false, this._translations_loaded = false, this._states_updated = true, this._confirmTimeout = null, this._entity_ids = {}, this._entity_states = new Map(), this._config_updated = true, this._translations = {
             "button": "Mark as Watered !",
             "cancel": "Cancel",
             "today": "today"

@@ -106,10 +106,51 @@ export const styles = css`
 
     /* ── Buttons ────────────────────────────────────────────────────── */
 
-    ha-button {
+    .progress-button {
         width: 100%;
         margin-top: 8px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: inherit;
+        transition: filter 0.15s;
+        /*
+         * --rgb-primary-color and --rgb-error-color are exposed by HA themes
+         * as raw "R, G, B" values, letting us use rgba() for opacity control
+         * while staying on-theme. Fallbacks cover themes that don't export them.
+         */
+        background: linear-gradient(
+            to right,
+            rgba(var(--rgb-primary-color, 3, 169, 244), 0.85) var(--progress, 0%),
+            rgba(var(--rgb-primary-color, 3, 169, 244), 0.12) var(--progress, 0%)
+        );
     }
+
+    .progress-button.overdue {
+        background: linear-gradient(
+            to right,
+            rgba(var(--rgb-error-color, 176, 0, 32), 0.85) var(--progress, 100%),
+            rgba(var(--rgb-error-color, 176, 0, 32), 0.15) var(--progress, 100%)
+        );
+    }
+
+    .progress-button.confirming {
+        animation: confirm-pulse 0.7s ease-in-out infinite;
+    }
+
+    @keyframes confirm-pulse {
+        0%, 100% { filter: brightness(1); }
+        50%       { filter: brightness(1.25); }
+    }
+
+    .progress-button:hover  { filter: brightness(1.1); }
+    .progress-button:active { filter: brightness(0.9); }
 
     ha-icon-button {
         position: absolute;

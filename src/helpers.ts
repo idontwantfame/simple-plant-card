@@ -40,7 +40,7 @@ function dateDiffInDays(a: Date, b: Date) {
   return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
 
-function relativeDays(isoDateString: string) {
+export function relativeDays(isoDateString: string) {
     const today = new Date(Date.now());
     const dateB = new Date(Date.parse(isoDateString));
     return dateDiffInDays(today, dateB);
