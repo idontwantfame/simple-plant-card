@@ -19,8 +19,10 @@ test("health appears as a metric tile instead of a separate status row", () => {
     assert.equal(cardSource.includes("--sensor-columns"), false);
 });
 
-test("watering timing is included in the action button label", () => {
-    assert.match(cardSource, /button_detail/);
-    assert.match(cardSource, /next_watering/);
+test("watering action button separates due timing from action detail", () => {
+    assert.match(cardSource, /water_day/);
+    assert.match(cardSource, /Water \$\{next_watering\}/);
+    assert.match(cardSource, /mark_watered/);
+    assert.match(cardSource, /water_day_detail/);
     assert.match(cardSource, /class="button-label"/);
 });

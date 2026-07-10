@@ -32,6 +32,8 @@ export class SimplePlantCard extends LitElement {
     private _config_updated: boolean = true ;
     private _translations : Dictionary<string> = {
         "button": "Mark as Watered !",
+        "mark_watered": "Mark as watered",
+        "water_day_detail": "It's water day",
         "cancel": "Cancel",
         "today": "today"
     }
@@ -156,6 +158,7 @@ export class SimplePlantCard extends LitElement {
         const today = this._translations["today"];
         const next_watering = relativeDate(next_date, local, today);
 
+        const water_day = this._entity_states.get("todo").state === "on";
         const late = this._entity_states.get("problem").state === "on";
 
         const last_date = this._entity_states.get("last_watered").state;
@@ -163,12 +166,18 @@ export class SimplePlantCard extends LitElement {
         const is_cancel = last_watered === today
         const button_label = this._confirming
             ? "Are you sure?"
-            : is_cancel ? this._translations["cancel"] : this._translations["button"]
+            : is_cancel
+                ? this._translations["cancel"]
+                : water_day
+                    ? this._translations["button"]
+                    : `Water ${next_watering}`
         const button_detail = this._confirming
             ? ""
-            : late
-                ? this._translations["late"]
-                : next_watering
+            : is_cancel
+                ? ""
+                : water_day
+                    ? this._translations["water_day_detail"]
+                    : this._translations["mark_watered"]
 
         const days_since_watered = Math.max(-relativeDays(last_date), 0)
         const progress = Math.min(days_since_watered / days_between_value, 1)
@@ -363,7 +372,10 @@ export class SimplePlantCard extends LitElement {
             return
         const translation_key = `component.${INTEGRATION}.entity.button.mark_watered.name`
         const button_name = this._hass.localize(translation_key)
-        if (button_name) this._translations["button"] = `${button_name} !`
+        if (button_name) {
+            this._translations["button"] = `${button_name} !`
+            this._translations["mark_watered"] = button_name
+        }
         const cancel = this._hass.localize("ui.dialogs.generic.cancel")
         if (cancel) this._translations["cancel"] = cancel
         const today = this._hass.localize("ui.components.calendar.today")
