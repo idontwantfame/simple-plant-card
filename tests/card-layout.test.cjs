@@ -4,6 +4,7 @@ const test = require("node:test");
 
 const cardSource = readFileSync("src/card.ts", "utf8");
 const editorSource = readFileSync("src/editor.ts", "utf8");
+const stylesSource = readFileSync("src/styles.ts", "utf8");
 
 test("editor does not expose manual metric grid columns", () => {
     assert.equal(editorSource.includes("sensor_columns"), false);
@@ -25,4 +26,10 @@ test("watering action button separates due timing from action detail", () => {
     assert.match(cardSource, /mark_watered/);
     assert.match(cardSource, /water_day_detail/);
     assert.match(cardSource, /class="button-label"/);
+});
+
+test("watering action button has a distinct water-day colour", () => {
+    assert.match(cardSource, /water_day && !late \? 'water-day' : ''/);
+    assert.match(stylesSource, /\.progress-button\.water-day/);
+    assert.match(stylesSource, /--rgb-warning-color/);
 });

@@ -754,6 +754,14 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
         );
     }
 
+    .progress-button.water-day {
+        background: linear-gradient(
+            to right,
+            rgba(var(--rgb-warning-color, 255, 152, 0), 0.85) var(--progress, 100%),
+            rgba(var(--rgb-warning-color, 255, 152, 0), 0.15) var(--progress, 100%)
+        );
+    }
+
     .progress-button.confirming {
         animation: confirm-pulse 0.7s ease-in-out infinite;
     }
@@ -1094,7 +1102,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
                         ${metrics_section}
 
                         <button
-                            class="progress-button ${late ? 'overdue' : ''} ${this._confirming ? 'confirming' : ''}"
+                            class="progress-button ${late ? 'overdue' : ''} ${water_day && !late ? 'water-day' : ''} ${this._confirming ? 'confirming' : ''}"
                             style="--progress: ${Math.round(progress * 100)}%"
                             @click="${()=>this._handleButton()}"
                         >

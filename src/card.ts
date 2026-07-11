@@ -260,7 +260,7 @@ export class SimplePlantCard extends LitElement {
                         ${metrics_section}
 
                         <button
-                            class="progress-button ${late ? 'overdue' : ''} ${this._confirming ? 'confirming' : ''}"
+                            class="progress-button ${late ? 'overdue' : ''} ${water_day && !late ? 'water-day' : ''} ${this._confirming ? 'confirming' : ''}"
                             style="--progress: ${Math.round(progress * 100)}%"
                             @click="${() => this._handleButton()}"
                         >

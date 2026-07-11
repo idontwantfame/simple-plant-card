@@ -132,6 +132,14 @@ export const styles = css`
         );
     }
 
+    .progress-button.water-day {
+        background: linear-gradient(
+            to right,
+            rgba(var(--rgb-warning-color, 255, 152, 0), 0.85) var(--progress, 100%),
+            rgba(var(--rgb-warning-color, 255, 152, 0), 0.15) var(--progress, 100%)
+        );
+    }
+
     .progress-button.confirming {
         animation: confirm-pulse 0.7s ease-in-out infinite;
     }
