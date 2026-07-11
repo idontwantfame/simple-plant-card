@@ -28,6 +28,12 @@ test("watering action button separates due timing from action detail", () => {
     assert.match(cardSource, /class="button-label"/);
 });
 
+test("cancel action includes last watered timing as button detail", () => {
+    assert.match(cardSource, /last_watered_detail/);
+    assert.match(cardSource, /\$\{this\._translations\["last_watered_detail"\]\} \$\{last_watered\}/);
+    assert.doesNotMatch(cardSource, /is_cancel\s*\?\s*""/);
+});
+
 test("watering action button has a distinct water-day colour", () => {
     assert.match(cardSource, /water_day && !late \? 'water-day' : ''/);
     assert.match(stylesSource, /\.progress-button\.water-day/);

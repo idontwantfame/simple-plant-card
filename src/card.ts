@@ -34,6 +34,7 @@ export class SimplePlantCard extends LitElement {
         "button": "Mark as Watered !",
         "mark_watered": "Mark as watered",
         "water_day_detail": "It's water day",
+        "last_watered_detail": "Last watered",
         "cancel": "Cancel",
         "today": "today"
     }
@@ -174,7 +175,7 @@ export class SimplePlantCard extends LitElement {
         const button_detail = this._confirming
             ? ""
             : is_cancel
-                ? ""
+                ? `${this._translations["last_watered_detail"]} ${last_watered}`
                 : water_day
                     ? this._translations["water_day_detail"]
                     : this._translations["mark_watered"]
