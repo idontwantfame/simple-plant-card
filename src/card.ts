@@ -148,8 +148,12 @@ export class SimplePlantCard extends LitElement {
         this._loadTranslations()
         // compute strings
         const health_key_prefix = "component.simple_plant.entity.select.health.state"
-        const health_key = `${health_key_prefix}.${this._entity_states.get("health").state}`
-        const health = this._hass.localize(health_key)
+        const health_state = this._entity_states.get("health")?.state ?? ""
+        const normalized_health_state = health_state.trim().toLowerCase()
+        const unset_health_states = ["unknown", "unavailable", "", "notset"]
+        const health_key = `${health_key_prefix}.${health_state}`
+        const health = this._hass.localize(health_key) || health_state
+        const health_set = !unset_health_states.includes(normalized_health_state)
 
         const days_between_label = this._entity_states.get("days_between_waterings").attributes.friendly_name
         const days_between_value = parseInt(this._entity_states.get("days_between_waterings").state)
@@ -194,14 +198,17 @@ export class SimplePlantCard extends LitElement {
                 const problem = this._entity_states.get(problem_key)?.state === "on"
                 const hasColor = problem || key === "health"
                 const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)"
+                const showIcon = key !== "health" || health_set
                 return html`
                     <div class="row">
-                        <ha-icon
-                            .icon=${icon}
-                            ?data-color=${hasColor}
-                            style="${hasColor ? `--color: ${color};` : ""}"
-                            @click="${() => this._moreInfo(key)}"
-                        ></ha-icon>
+                        ${showIcon ? html`
+                            <ha-icon
+                                .icon=${icon}
+                                ?data-color=${hasColor}
+                                style="${hasColor ? `--color: ${color};` : ""}"
+                                @click="${() => this._moreInfo(key)}"
+                            ></ha-icon>
+                        ` : html``}
                         <div class="content" @click="${() => this._moreInfo(key)}">
                             <p>${value} ${unit}</p>
                         </div>
@@ -218,13 +225,16 @@ export class SimplePlantCard extends LitElement {
                         const problem = this._entity_states.get(problem_key)?.state === "on"
                         const hasColor = problem || key === "health"
                         const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)"
+                        const showIcon = key !== "health" || health_set
                         return html`
                             <div class="metric-tile" @click="${() => this._moreInfo(key)}">
-                                <ha-icon
-                                    .icon=${icon}
-                                    ?data-color=${hasColor}
-                                    style="${hasColor ? `--color: ${color};` : ""}"
-                                ></ha-icon>
+                                ${showIcon ? html`
+                                    <ha-icon
+                                        .icon=${icon}
+                                        ?data-color=${hasColor}
+                                        style="${hasColor ? `--color: ${color};` : ""}"
+                                    ></ha-icon>
+                                ` : html``}
                                 <span>${value} ${unit}</span>
                             </div>
                         `
