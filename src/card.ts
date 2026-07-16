@@ -188,9 +188,10 @@ export class SimplePlantCard extends LitElement {
         const progress = Math.min(days_since_watered / days_between_value, 1)
 
         const configured_metrics = SimplePlantCard.metrics.filter(({key}) => this._entity_ids[key])
-        const metrics_section = configured_metrics.length === 0 ? html`` :
+        const visible_metrics = configured_metrics.filter(({key}) => key !== "health" || health_set)
+        const metrics_section = visible_metrics.length === 0 ? html`` :
             this._sensor_layout === "list"
-            ? html`${configured_metrics.map(({key, problem_key, icon}) => {
+            ? html`${visible_metrics.map(({key, problem_key, icon}) => {
                 const entity = this._entity_states.get(key)
                 if (!entity) return html``
                 const value = key === "health" ? health : entity.state
@@ -198,17 +199,14 @@ export class SimplePlantCard extends LitElement {
                 const problem = this._entity_states.get(problem_key)?.state === "on"
                 const hasColor = problem || key === "health"
                 const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)"
-                const showIcon = key !== "health" || health_set
                 return html`
                     <div class="row">
-                        ${showIcon ? html`
-                            <ha-icon
-                                .icon=${icon}
-                                ?data-color=${hasColor}
-                                style="${hasColor ? `--color: ${color};` : ""}"
-                                @click="${() => this._moreInfo(key)}"
-                            ></ha-icon>
-                        ` : html``}
+                        <ha-icon
+                            .icon=${icon}
+                            ?data-color=${hasColor}
+                            style="${hasColor ? `--color: ${color};` : ""}"
+                            @click="${() => this._moreInfo(key)}"
+                        ></ha-icon>
                         <div class="content" @click="${() => this._moreInfo(key)}">
                             <p>${value} ${unit}</p>
                         </div>
@@ -216,8 +214,8 @@ export class SimplePlantCard extends LitElement {
                 `
             })}`
             : html`
-                <div class="metrics-grid" style="--metric-columns: ${configured_metrics.length};">
-                    ${configured_metrics.map(({key, problem_key, icon}) => {
+                <div class="metrics-grid" style="--metric-columns: ${visible_metrics.length};">
+                    ${visible_metrics.map(({key, problem_key, icon}) => {
                         const entity = this._entity_states.get(key)
                         if (!entity) return html``
                         const value = key === "health" ? health : entity.state
@@ -225,16 +223,13 @@ export class SimplePlantCard extends LitElement {
                         const problem = this._entity_states.get(problem_key)?.state === "on"
                         const hasColor = problem || key === "health"
                         const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)"
-                        const showIcon = key !== "health" || health_set
                         return html`
                             <div class="metric-tile" @click="${() => this._moreInfo(key)}">
-                                ${showIcon ? html`
-                                    <ha-icon
-                                        .icon=${icon}
-                                        ?data-color=${hasColor}
-                                        style="${hasColor ? `--color: ${color};` : ""}"
-                                    ></ha-icon>
-                                ` : html``}
+                                <ha-icon
+                                    .icon=${icon}
+                                    ?data-color=${hasColor}
+                                    style="${hasColor ? `--color: ${color};` : ""}"
+                                ></ha-icon>
                                 <span>${value} ${unit}</span>
                             </div>
                         `

@@ -20,14 +20,16 @@ test("health appears as a metric tile instead of a separate status row", () => {
     assert.equal(cardSource.includes("--sensor-columns"), false);
 });
 
-test("health icon is hidden when health is not set", () => {
+test("health metric is hidden when health is not set", () => {
     assert.match(cardSource, /const normalized_health_state = health_state\.trim\(\)\.toLowerCase\(\)/);
     assert.match(cardSource, /const unset_health_states = \["unknown", "unavailable", "", "notset"\]/);
     assert.match(cardSource, /const health = this\._hass\.localize\(health_key\) \|\| health_state/);
     assert.match(cardSource, /const health_set = !unset_health_states\.includes\(normalized_health_state\)/);
     assert.equal(cardSource.includes("not_set"), false);
-    assert.match(cardSource, /const showIcon = key !== "health" \|\| health_set/);
-    assert.match(cardSource, /\$\{showIcon \? html`[\s\S]*?<ha-icon[\s\S]*?` : html``\}/);
+    assert.match(cardSource, /const visible_metrics = configured_metrics\.filter\(\(\{key\}\) => key !== "health" \|\| health_set\)/);
+    assert.match(cardSource, /visible_metrics\.length === 0 \? html``/);
+    assert.match(cardSource, /--metric-columns: \$\{visible_metrics\.length\};/);
+    assert.match(cardSource, /visible_metrics\.map/);
 });
 
 test("watering action button separates due timing from action detail", () => {

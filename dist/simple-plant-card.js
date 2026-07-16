@@ -1038,7 +1038,8 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const days_since_watered = Math.max(-(0, $feccc7a5980a21d5$export$f31e827513f08f84)(last_date), 0);
         const progress = Math.min(days_since_watered / days_between_value, 1);
         const configured_metrics = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]);
-        const metrics_section = configured_metrics.length === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`` : this._sensor_layout === "list" ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
+        const visible_metrics = configured_metrics.filter(({ key: key })=>key !== "health" || health_set);
+        const metrics_section = visible_metrics.length === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`` : this._sensor_layout === "list" ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${visible_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
             const value = key === "health" ? health : entity.state;
@@ -1046,25 +1047,22 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
             const problem = this._entity_states.get(problem_key)?.state === "on";
             const hasColor = problem || key === "health";
             const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)";
-            const showIcon = key !== "health" || health_set;
             return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                     <div class="row">
-                        ${showIcon ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                            <ha-icon
-                                .icon=${icon}
-                                ?data-color=${hasColor}
-                                style="${hasColor ? `--color: ${color};` : ""}"
-                                @click="${()=>this._moreInfo(key)}"
-                            ></ha-icon>
-                        ` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``}
+                        <ha-icon
+                            .icon=${icon}
+                            ?data-color=${hasColor}
+                            style="${hasColor ? `--color: ${color};` : ""}"
+                            @click="${()=>this._moreInfo(key)}"
+                        ></ha-icon>
                         <div class="content" @click="${()=>this._moreInfo(key)}">
                             <p>${value} ${unit}</p>
                         </div>
                     </div>
                 `;
         })}` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                <div class="metrics-grid" style="--metric-columns: ${configured_metrics.length};">
-                    ${configured_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
+                <div class="metrics-grid" style="--metric-columns: ${visible_metrics.length};">
+                    ${visible_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
             const value = key === "health" ? health : entity.state;
@@ -1072,16 +1070,13 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
             const problem = this._entity_states.get(problem_key)?.state === "on";
             const hasColor = problem || key === "health";
             const color = key === "health" ? entity.attributes.color : "var(--error-color, Tomato)";
-            const showIcon = key !== "health" || health_set;
             return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
                             <div class="metric-tile" @click="${()=>this._moreInfo(key)}">
-                                ${showIcon ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-                                    <ha-icon
-                                        .icon=${icon}
-                                        ?data-color=${hasColor}
-                                        style="${hasColor ? `--color: ${color};` : ""}"
-                                    ></ha-icon>
-                                ` : (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``}
+                                <ha-icon
+                                    .icon=${icon}
+                                    ?data-color=${hasColor}
+                                    style="${hasColor ? `--color: ${color};` : ""}"
+                                ></ha-icon>
                                 <span>${value} ${unit}</span>
                             </div>
                         `;
