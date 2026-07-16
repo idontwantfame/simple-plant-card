@@ -27,9 +27,15 @@ test("health metric is hidden when health is not set", () => {
     assert.match(cardSource, /const health_set = !unset_health_states\.includes\(normalized_health_state\)/);
     assert.equal(cardSource.includes("not_set"), false);
     assert.match(cardSource, /const visible_metrics = configured_metrics\.filter\(\(\{key\}\) => key !== "health" \|\| health_set\)/);
-    assert.match(cardSource, /visible_metrics\.length === 0 \? html``/);
+    assert.match(cardSource, /visible_metrics\.length === 0 \? html`/);
     assert.match(cardSource, /--metric-columns: \$\{visible_metrics\.length\};/);
     assert.match(cardSource, /visible_metrics\.map/);
+});
+
+test("empty metric area is reserved when no metrics are visible", () => {
+    assert.match(cardSource, /visible_metrics\.length === 0 \? html`[\s\S]*?metrics-grid metrics-grid--empty[\s\S]*?` :/);
+    assert.match(stylesSource, /\.metrics-grid--empty/);
+    assert.match(stylesSource, /min-height: 39px/);
 });
 
 test("watering action button separates due timing from action detail", () => {

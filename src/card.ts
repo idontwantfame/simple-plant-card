@@ -189,7 +189,9 @@ export class SimplePlantCard extends LitElement {
 
         const configured_metrics = SimplePlantCard.metrics.filter(({key}) => this._entity_ids[key])
         const visible_metrics = configured_metrics.filter(({key}) => key !== "health" || health_set)
-        const metrics_section = visible_metrics.length === 0 ? html`` :
+        const metrics_section = visible_metrics.length === 0 ? html`
+            <div class="metrics-grid metrics-grid--empty"></div>
+        ` :
             this._sensor_layout === "list"
             ? html`${visible_metrics.map(({key, problem_key, icon}) => {
                 const entity = this._entity_states.get(key)

@@ -830,6 +830,10 @@ const $13632afec4749c69$export$9dd6ff9ea0189349 = (0, $def2de46b9306e8a$export$d
         margin-top: 8px;
     }
 
+    .metrics-grid--empty {
+        min-height: 39px;
+    }
+
     .metric-tile {
         display: flex;
         flex-direction: column;
@@ -1039,7 +1043,9 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const progress = Math.min(days_since_watered / days_between_value, 1);
         const configured_metrics = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]);
         const visible_metrics = configured_metrics.filter(({ key: key })=>key !== "health" || health_set);
-        const metrics_section = visible_metrics.length === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`` : this._sensor_layout === "list" ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${visible_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
+        const metrics_section = visible_metrics.length === 0 ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
+            <div class="metrics-grid metrics-grid--empty"></div>
+        ` : this._sensor_layout === "list" ? (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`${visible_metrics.map(({ key: key, problem_key: problem_key, icon: icon })=>{
             const entity = this._entity_states.get(key);
             if (!entity) return (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)``;
             const value = key === "health" ? health : entity.state;

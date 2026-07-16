@@ -208,6 +208,10 @@ export const styles = css`
         margin-top: 8px;
     }
 
+    .metrics-grid--empty {
+        min-height: 39px;
+    }
+
     .metric-tile {
         display: flex;
         flex-direction: column;
