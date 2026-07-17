@@ -46,6 +46,11 @@ test("watering action button separates due timing from action detail", () => {
     assert.match(cardSource, /class="button-label"/);
 });
 
+test("late watering detail takes precedence over water-day detail", () => {
+    assert.match(cardSource, /"late": "Late Watering"/);
+    assert.match(cardSource, /late\s*\?\s*this\._translations\["late"\]\s*:\s*water_day\s*\?\s*this\._translations\["water_day_detail"\]/);
+});
+
 test("cancel action includes last watered timing as button detail", () => {
     assert.match(cardSource, /last_watered_detail/);
     assert.match(cardSource, /\$\{this\._translations\["last_watered_detail"\]\} \$\{last_watered\}/);

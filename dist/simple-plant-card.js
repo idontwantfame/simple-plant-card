@@ -1038,7 +1038,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
         const last_watered = (0, $feccc7a5980a21d5$export$6270e84457db9b38)(last_date, local, today);
         const is_cancel = last_watered === today;
         const button_label = this._confirming ? "Are you sure?" : is_cancel ? this._translations["cancel"] : water_day ? this._translations["button"] : `Water ${next_watering}`;
-        const button_detail = this._confirming ? "" : is_cancel ? `${this._translations["last_watered_detail"]} ${last_watered}` : water_day ? this._translations["water_day_detail"] : this._translations["mark_watered"];
+        const button_detail = this._confirming ? "" : is_cancel ? `${this._translations["last_watered_detail"]} ${last_watered}` : late ? this._translations["late"] : water_day ? this._translations["water_day_detail"] : this._translations["mark_watered"];
         const days_since_watered = Math.max(-(0, $feccc7a5980a21d5$export$f31e827513f08f84)(last_date), 0);
         const progress = Math.min(days_since_watered / days_between_value, 1);
         const configured_metrics = $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5.metrics.filter(({ key: key })=>this._entity_ids[key]);
@@ -1225,6 +1225,7 @@ class $a399cc6bbb0eb26a$export$ca6a74221cf9b5c5 extends (0, $ab210b2da7b39b9d$ex
             "button": "Mark as Watered !",
             "mark_watered": "Mark as watered",
             "water_day_detail": "It's water day",
+            "late": "Late Watering",
             "last_watered_detail": "Last watered",
             "cancel": "Cancel",
             "today": "today"
